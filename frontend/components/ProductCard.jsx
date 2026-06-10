@@ -1,12 +1,12 @@
+import {Link} from "react-router-dom";
 function ProductCard({ product }) {
   
   const imageUrl = product.image
     ? `${import.meta.env.VITE_API_URL}${product.image}`
     : "";
 
-  console.log("Image URL:", imageUrl);
-
   return (
+    <Link to={`/products/${product.id}`} className="block bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
     <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
       <img
         src={imageUrl}
@@ -38,6 +38,7 @@ function ProductCard({ product }) {
         </div>
       </div>
     </div>
+    </Link>
   );
 }
 
