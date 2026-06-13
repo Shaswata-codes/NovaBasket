@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 function ProductDetails() {
   const { id } = useParams();
+  const { addToCart, setIsCartOpen } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -160,9 +162,12 @@ function ProductDetails() {
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="mt-8 pt-8 border-t border-gray-100 flex flex-col sm:flex-row gap-4">
-              <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-base font-bold px-8 py-4 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
+             {/* Actions */}
+            <div className="mt-8 pt-8 border-t border-gray-100 flex flex-col sm:flex-row gap-4 items-center">
+              <button 
+                onClick={() => addToCart(product.id, 1)}
+                className="flex-1 w-full bg-blue-600 hover:bg-blue-700 text-white text-base font-bold px-8 py-4 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -179,12 +184,18 @@ function ProductDetails() {
                 </svg>
                 Add to Cart
               </button>
-              <button className="flex-1 bg-gray-900 hover:bg-black text-white text-base font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 cursor-pointer">
+              <button 
+                onClick={() => {
+                  addToCart(product.id, 1);
+                  setIsCartOpen(true);
+                }}
+                className="flex-1 w-full bg-gray-900 hover:bg-black text-white text-base font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 cursor-pointer"
+              >
                 Buy Now
               </button>
               {/* Home Button */}
-              <div>
-                <a href="/" className="flex items-center gap-2">
+              <div className="sm:ml-auto">
+                <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors py-2 px-3 hover:bg-gray-50 rounded-xl">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -200,7 +211,7 @@ function ProductDetails() {
                     />
                   </svg>
                   Home
-                </a>
+                </Link>
               </div>
             </div>
           </div>
