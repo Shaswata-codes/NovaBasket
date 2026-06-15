@@ -4,10 +4,16 @@ const CartContext = createContext();
 
 const getOrCreateCartId = () => {
   let cartId = localStorage.getItem("cart_id");
+
   if (!cartId) {
-    cartId = "cart_" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    cartId =
+      "cart_" +
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
+
     localStorage.setItem("cart_id", cartId);
   }
+
   return cartId;
 };
 
@@ -17,7 +23,8 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const cartId = getOrCreateCartId();
-  const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+  const apiUrl =
+    import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
   const fetchCart = async () => {
     try {
@@ -26,6 +33,7 @@ export const CartProvider = ({ children }) => {
           "X-Cart-ID": cartId,
         },
       });
+
       if (response.ok) {
         const data = await response.json();
         setCart(data);
@@ -45,12 +53,16 @@ export const CartProvider = ({ children }) => {
           "Content-Type": "application/json",
           "X-Cart-ID": cartId,
         },
-        body: JSON.stringify({ product_id: productId, quantity }),
+        body: JSON.stringify({
+          product_id: productId,
+          quantity,
+        }),
       });
+
       if (response.ok) {
         const data = await response.json();
         setCart(data);
-        setIsCartOpen(true); // Auto-open drawer when item is added
+        setIsCartOpen(true);
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -65,8 +77,11 @@ export const CartProvider = ({ children }) => {
           "Content-Type": "application/json",
           "X-Cart-ID": cartId,
         },
-        body: JSON.stringify({ product_id: productId }),
+        body: JSON.stringify({
+          product_id: productId,
+        }),
       });
+
       if (response.ok) {
         const data = await response.json();
         setCart(data);
@@ -84,8 +99,12 @@ export const CartProvider = ({ children }) => {
           "Content-Type": "application/json",
           "X-Cart-ID": cartId,
         },
-        body: JSON.stringify({ product_id: productId, quantity }),
+        body: JSON.stringify({
+          product_id: productId,
+          quantity,
+        }),
       });
+
       if (response.ok) {
         const data = await response.json();
         setCart(data);
@@ -95,23 +114,51 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const clearCart = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/api/cart/clear/`, {
+        method: "POST",
+        headers: {
+          "X-Cart-ID": cartId,
+        },
+      });
+
+      if (response.ok) {
+        setCart({
+          items: [],
+          total: 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+    }
+  };
+
   useEffect(() => {
     fetchCart();
   }, []);
 
-  const totalItemsCount = cart.items ? cart.items.reduce((acc, item) => acc + item.quantity, 0) : 0;
+  const totalItemsCount = cart.items
+    ? cart.items.reduce(
+        (acc, item) => acc + item.quantity,
+        0
+      )
+    : 0;
 
   return (
     <CartContext.Provider
       value={{
         cart,
+        cartItems: cart.items,
         isCartOpen,
         setIsCartOpen,
         addToCart,
         removeFromCart,
         updateQuantity,
+        clearCart,
         totalItemsCount,
         loading,
+        fetchCart,
       }}
     >
       {children}
@@ -121,8 +168,12 @@ export const CartProvider = ({ children }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
+
   if (!context) {
-    throw new Error("useCart must be used within a CartProvider");
+    throw new Error(
+      "useCart must be used within a CartProvider"
+    );
   }
+
   return context;
 };

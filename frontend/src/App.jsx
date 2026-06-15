@@ -5,6 +5,8 @@ import Navbar from "./components/Navbar";
 import CartDrawer from "./components/CartDrawer";
 import { CartProvider } from "./context/CartContext";
 import "./App.css";
+import Checkout from "./pages/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmation";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
             <Routes>
               <Route path="/" element={<ProductList />} />
               <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/order/:id" element={<OrderConfirmation />} />
             </Routes>
           </main>
           <CartDrawer />
