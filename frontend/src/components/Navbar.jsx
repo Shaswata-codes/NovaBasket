@@ -1,46 +1,87 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { clearToken, getAccessToken } from "../utils/auth";
 
 function Navbar() {
-  const { setIsCartOpen, totalItemsCount } = useCart();
+  const { setIsCartOpen, totalItemsCount, fetchCart } = useCart();
+  const navigate = useNavigate();
+
+  const isLoggedIn = () => {
+    return !!getAccessToken();
+  };
+
+  const logout = async () => {
+    clearToken();
+    await fetchCart();
+    navigate("/login");
+  };
 
   return (
-    <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300">
+    <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo Section */}
-          <div className="flex items-center gap-2">
-            <Link to="/" className="flex items-center gap-1.5 group">
-              <span className="text-2xl font-black bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent transform group-hover:scale-105 transition-transform duration-300">
-                ⚡ SwiftStore
-              </span>
-            </Link>
-          </div>
 
-          {/* Navigation Links */}
-          <div className="hidden sm:flex items-center gap-6">
+        <div className="flex justify-between items-center h-16">
+
+          {/* Logo */}
+          <Link
+            to="/"
+            className="text-2xl font-black bg-linear-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent"
+          >
+            ⚡ SwiftStore
+          </Link>
+
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-6">
             <Link
               to="/"
-              className="text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"
+              className="text-sm font-semibold text-gray-600 hover:text-blue-600"
             >
               Shop
             </Link>
-            <span className="text-gray-200">|</span>
+
+            <span className="text-gray-300">|</span>
+
             <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
               Free Delivery
             </span>
           </div>
 
-          {/* Cart Icon Section */}
-          <div className="flex items-center">
+          {/* Right Side */}
+          <div className="flex items-center gap-3">
+
+            {!isLoggedIn() ? (
+              <>
+                <Link
+                  to="/login"
+                  className="text-sm font-semibold text-gray-700 hover:text-blue-600"
+                >
+                  Login
+                </Link>
+
+                <Link
+                  to="/signup"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition"
+                >
+                  Sign Up
+                </Link>
+              </>
+            ) : (
+              <button
+                onClick={logout}
+                className="text-sm font-semibold text-red-600 hover:text-red-700"
+              >
+                Logout
+              </button>
+            )}
+
+            {/* Cart */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-full transition-all duration-300 active:scale-95 group focus:outline-none cursor-pointer"
-              aria-label="Shopping Cart"
+              className="relative p-2.5 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-full transition cursor-pointer"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 transform group-hover:rotate-6 transition-transform"
+                className="h-6 w-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -53,13 +94,13 @@ function Navbar() {
                 />
               </svg>
 
-              {/* Dynamic Badge */}
               {totalItemsCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 min-w-5 h-5 flex items-center justify-center px-1 bg-gradient-to-r from-rose-500 to-red-500 text-white text-[10px] font-extrabold rounded-full border-2 border-white shadow-sm animate-fade-in animate-bounce-subtle">
+                <span className="absolute top-0 right-0 min-w-5 h-5 flex items-center justify-center px-1 bg-red-500 text-white text-xs font-bold rounded-full">
                   {totalItemsCount}
                 </span>
               )}
             </button>
+
           </div>
         </div>
       </div>

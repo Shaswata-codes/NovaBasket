@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { getAccessToken } from "../utils/auth";
 
 function ProductDetails() {
   const { id } = useParams();
-  const { addToCart, setIsCartOpen } = useCart();
+  const navigate = useNavigate();
+
+  const { addToCart } = useCart();
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,10 +31,48 @@ function ProductDetails() {
       });
   }, [id]);
 
+  const handleAddToCart = async () => {
+    const token = getAccessToken();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    await addToCart(product.id, 1);
+  };
+
+  const handleBuyNow = async () => {
+    const token = getAccessToken();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    await addToCart(product.id, 1);
+    navigate("/checkout");
+  };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath)
+      return "https://via.placeholder.com/600x600?text=No+Image";
+
+    if (
+      imagePath.startsWith("http://") ||
+      imagePath.startsWith("https://")
+    ) {
+      return imagePath;
+    }
+
+    return `${import.meta.env.VITE_API_URL}${imagePath}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
         <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+
         <p className="mt-4 text-gray-600 font-medium animate-pulse">
           Loading product details...
         </p>
@@ -58,12 +100,15 @@ function ProductDetails() {
               />
             </svg>
           </div>
+
           <h2 className="text-xl font-bold text-gray-900 mb-2">
             Error Loading Product
           </h2>
+
           <p className="text-gray-600 mb-6">
             {error?.message || "Product could not be found"}
           </p>
+
           <Link
             to="/"
             className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition duration-200 w-full shadow-lg shadow-blue-500/20"
@@ -75,18 +120,9 @@ function ProductDetails() {
     );
   }
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return "https://via.placeholder.com/600x600?text=No+Image";
-    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
-      return imagePath;
-    }
-    return `${import.meta.env.VITE_API_URL}${imagePath}`;
-  };
-
   return (
     <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        {/* Back Button */}
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors mb-8 group"
@@ -108,9 +144,8 @@ function ProductDetails() {
           Back to Store
         </Link>
 
-        {/* Product Card Container */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 p-6 sm:p-8 lg:p-12">
-          {/* Left: Image Panel */}
+          {/* Image */}
           <div className="relative aspect-square lg:h-[500px] rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center group shadow-inner">
             <img
               src={getImageUrl(product.image)}
@@ -121,6 +156,7 @@ function ProductDetails() {
                   "https://via.placeholder.com/600x600?text=No+Image";
               }}
             />
+
             {product.category && (
               <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm text-gray-800 text-xs font-bold px-4 py-2 rounded-full shadow-md border border-gray-100">
                 {product.category.name}
@@ -128,7 +164,7 @@ function ProductDetails() {
             )}
           </div>
 
-          {/* Right: Info Panel */}
+          {/* Product Info */}
           <div className="flex flex-col justify-between">
             <div>
               {product.category && (
@@ -136,6 +172,7 @@ function ProductDetails() {
                   {product.category.name}
                 </span>
               )}
+
               <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
                 {product.name}
               </h1>
@@ -144,6 +181,7 @@ function ProductDetails() {
                 <span className="text-3xl font-extrabold text-emerald-600">
                   ₹{product.price}
                 </span>
+
                 <span className="text-sm text-gray-500 bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-semibold">
                   In Stock
                 </span>
@@ -155,6 +193,7 @@ function ProductDetails() {
                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">
                   Description
                 </h3>
+
                 <p className="text-gray-600 leading-relaxed text-base">
                   {product.description ||
                     "No description provided for this product."}
@@ -162,54 +201,27 @@ function ProductDetails() {
               </div>
             </div>
 
-             {/* Actions */}
+            {/* Actions */}
             <div className="mt-8 pt-8 border-t border-gray-100 flex flex-col sm:flex-row gap-4 items-center">
-              <button 
-                onClick={() => addToCart(product.id, 1)}
+              <button
+                onClick={handleAddToCart}
                 className="flex-1 w-full bg-blue-600 hover:bg-blue-700 text-white text-base font-bold px-8 py-4 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
                 Add to Cart
               </button>
-              <button 
-                onClick={() => {
-                  addToCart(product.id, 1);
-                  setIsCartOpen(true);
-                }}
+
+              <button
+                onClick={handleBuyNow}
                 className="flex-1 w-full bg-gray-900 hover:bg-black text-white text-base font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 cursor-pointer"
               >
                 Buy Now
               </button>
-              {/* Home Button */}
+
               <div className="sm:ml-auto">
-                <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors py-2 px-3 hover:bg-gray-50 rounded-xl">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h6a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                    />
-                  </svg>
+                <Link
+                  to="/"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors py-2 px-3 hover:bg-gray-50 rounded-xl"
+                >
                   Home
                 </Link>
               </div>

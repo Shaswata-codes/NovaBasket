@@ -7,6 +7,9 @@ import { CartProvider } from "./context/CartContext";
 import "./App.css";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import PrivateRouter from "./components/PrivateRouter";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 function App() {
   return (
@@ -14,14 +17,42 @@ function App() {
       <Router>
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
           <Navbar />
+
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<ProductList />} />
-              <Route path="/products/:id" element={<ProductDetail />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/order/:id" element={<OrderConfirmation />} />
+
+              <Route
+                path="/product/:id"
+                element={<ProductDetail />}
+              />
+
+              <Route
+                element={<PrivateRouter />}
+              >
+                <Route
+                  path="/checkout"
+                  element={<Checkout />}
+                />
+
+                <Route
+                  path="/order/:id"
+                  element={<OrderConfirmation />}
+                />
+              </Route>
+
+              <Route
+                path="/login"
+                element={<Login />}
+              />
+
+              <Route
+                path="/signup"
+                element={<Signup />}
+              />
             </Routes>
           </main>
+
           <CartDrawer />
         </div>
       </Router>

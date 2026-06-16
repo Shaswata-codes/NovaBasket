@@ -1,11 +1,12 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useCart} from '../context/CartContext';
+import {authFetch} from '../utils/auth';
 
 function Checkout() {
     const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     const navigate = useNavigate();
-    const {cartItems, clearCart} = useCart();
+    const {clearCart} = useCart();
 
     const [form, setForm] = useState({
         name: '',
@@ -28,7 +29,7 @@ function Checkout() {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch(`${BASE_URL}/api/orders/create/`, {
+            const response = await authFetch(`${BASE_URL}/api/orders/create/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -46,6 +47,7 @@ function Checkout() {
                 setMessage(errorData.message);
             }
         } catch (error) {
+            console.error('Checkout error:', error);
             setMessage('An error occurred. Please try again.');
         }
     };

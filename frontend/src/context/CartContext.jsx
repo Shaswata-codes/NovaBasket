@@ -1,4 +1,6 @@
-import { createContext, useState, useEffect, useContext } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useEffect, useContext, useCallback } from "react";
+import { authFetch } from "../utils/auth";
 
 const CartContext = createContext();
 
@@ -22,13 +24,14 @@ export const CartProvider = ({ children }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const cartId = getOrCreateCartId();
+  const [cartId] = useState(getOrCreateCartId);
+
   const apiUrl =
     import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/cart/`, {
+      const response = await authFetch(`${apiUrl}/api/cart/`, {
         headers: {
           "X-Cart-ID": cartId,
         },
@@ -43,11 +46,11 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiUrl, cartId]);
 
   const addToCart = async (productId, quantity = 1) => {
     try {
-      const response = await fetch(`${apiUrl}/api/cart/add/`, {
+      const response = await authFetch(`${apiUrl}/api/cart/add/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +74,7 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (productId) => {
     try {
-      const response = await fetch(`${apiUrl}/api/cart/remove/`, {
+      const response = await authFetch(`${apiUrl}/api/cart/remove/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +96,7 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = async (productId, quantity) => {
     try {
-      const response = await fetch(`${apiUrl}/api/cart/update/`, {
+      const response = await authFetch(`${apiUrl}/api/cart/update/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +119,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/cart/clear/`, {
+      const response = await authFetch(`${apiUrl}/api/cart/clear/`, {
         method: "POST",
         headers: {
           "X-Cart-ID": cartId,
@@ -124,10 +127,8 @@ export const CartProvider = ({ children }) => {
       });
 
       if (response.ok) {
-        setCart({
-          items: [],
-          total: 0,
-        });
+        const data = await response.json();
+        setCart(data);
       }
     } catch (error) {
       console.error("Error clearing cart:", error);
@@ -135,8 +136,9 @@ export const CartProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCart();
-  }, []);
+  }, [fetchCart]);
 
   const totalItemsCount = cart.items
     ? cart.items.reduce(
@@ -149,7 +151,7 @@ export const CartProvider = ({ children }) => {
     <CartContext.Provider
       value={{
         cart,
-        cartItems: cart.items,
+        cartItems: cart.items || [],
         isCartOpen,
         setIsCartOpen,
         addToCart,
