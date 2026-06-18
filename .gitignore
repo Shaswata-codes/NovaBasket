@@ -5,7 +5,8 @@ __pycache__/
 
 # Django
 db.sqlite3
-media/
+backend/media/*
+!backend/media/products/
 
 # Environment variables
 .env
