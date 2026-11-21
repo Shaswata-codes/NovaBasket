@@ -6,6 +6,16 @@ This project was built mainly as a portfolio project to practice building a deco
 
 ---
 
+## Screenshots
+
+### Storefront / Product Catalog
+![Storefront](screenshots/storefront.jpg)
+
+### Django Administration Panel
+![Django Admin](screenshots/django_admin.jpg)
+
+---
+
 ## About the Project
 
 NovaBasket consists of a React frontend and a Django REST API backend connected to a PostgreSQL database hosted on Supabase.
@@ -51,5 +61,9 @@ NovaBasket/
 │   ├── src/
 │   ├── package.json
 │   └── vite.config.js
+│
+├── screenshots/
+│   ├── storefront.jpg
+│   └── django_admin.jpg
 │
 └── README.md
