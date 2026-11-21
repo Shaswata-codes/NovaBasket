@@ -77,8 +77,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-        },
-    },
+    ,
+,
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
@@ -95,7 +95,26 @@ print(f"DB_HOST is set: {os.getenv('DB_HOST') is not None}")
 print(f"DB_PORT is set: {os.getenv('DB_PORT') is not None}")
 print("------------------------------")
 
-DATABASES = {
+# Database configuration – use PostgreSQL if env vars are present, otherwise fall back to SQLite for deployments where a DB isn’t provisioned.
+if os.getenv('DB_NAME') and os.getenv('DB_USER') and os.getenv('DB_PASSWORD') and os.getenv('DB_HOST'):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv('DB_NAME'),
+            "USER": os.getenv('DB_USER'),
+            "PASSWORD": os.getenv('DB_PASSWORD'),
+            "HOST": os.getenv('DB_HOST'),
+            "PORT": os.getenv('DB_PORT'),
+    
+
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+    
+
+
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
@@ -103,7 +122,7 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
-    }
+
 }
 
 
@@ -113,16 +132,16 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
+,
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
+,
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
+,
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+,
 ]
 
 
@@ -175,7 +194,7 @@ SIMPLE_JWT = {
 # Email Configurations
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
